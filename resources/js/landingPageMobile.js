@@ -22,7 +22,7 @@ const studyPhase = (new URLSearchParams(window.location.search)).get("STUDY_PHAS
 const treatmentCondition = parseInt((new URLSearchParams(window.location.search)).get("TC"), 10);
 const originalDefault = (new URLSearchParams(window.location.search)).get("ORIGINAL_DEFAULT");
 
-const queryKeys = new Set(["q", "query", "p", "wd", "word"]);
+const queryKeys = new Set(["q", "query", "p", "wd", "word", "oq"]);
 
 let changedDefaultKey = changedDefault;
 if (changedDefaultKey == "Ask.com") {
@@ -74,10 +74,14 @@ document.getElementById('submitButton').onclick = async (event) => {
         })
         .then(data => {
             if (data.statusCode == 200) {
-                if (treatmentCondition >= 12 && treatmentCondition <= 15) {
-                    window.location.href = `http://search-engine-use.cs.princeton.edu/shortcut?PROLIFIC_PID=${prolificId}&ORIGINAL_DEFAULT=${originalDefault}&TC=${treatmentCondition}`;
+                if (studyPhase == "initial") {
+                    if (treatmentCondition >= 12 && treatmentCondition <= 15) {
+                        window.location.href = `http://search-engine-use.cs.princeton.edu/shortcut?PROLIFIC_PID=${prolificId}&ORIGINAL_DEFAULT=${originalDefault}&TC=${treatmentCondition}`;
+                    } else {
+                        window.location.href = `https://princetonsurvey.az1.qualtrics.com/jfe/form/SV_9RfCPe3l0Zxl30O?PROLIFIC_PID=${prolificId}`;
+                    }
                 } else {
-                    window.location.href = `https://princetonsurvey.az1.qualtrics.com/jfe/form/SV_9RfCPe3l0Zxl30O?PROLIFIC_PID=${prolificId}`;
+                    window.location.href = `https://princetonsurvey.az1.qualtrics.com/jfe/form/SV_4Zrmc8ungMIoDyK?PROLIFIC_PID=${prolificId}`;
                 }
             } else {
                 throw new Error();
@@ -176,7 +180,32 @@ function getSerpQuery(url, engine) {
     } catch (error) {
         return null;
     }
+}
 
+const COMMON_PUBLIC_SUFFIXES = new Set([
+    "co.uk", "com.au", "co.in", "com.br", "com.sg", "co.jp", "com.mx", "com.tr"
+]);
+
+function getBaseDomain(hostname) {
+    // hostname like "www.google.com" -> "google.com"
+    // handles common multi-part suffixes like co.uk -> "bbc.co.uk"
+    const parts = (hostname || "").toLowerCase().split(".").filter(Boolean);
+    if (parts.length <= 2) return parts.join(".");
+    const last2 = parts.slice(-2).join(".");
+    const last3 = parts.slice(-3).join(".");
+    // If the last two labels form a known public suffix (e.g., "co.uk"),
+    // the registrable domain is last3, else last2.
+    if (COMMON_PUBLIC_SUFFIXES.has(last2)) return last3;
+    return last2;
+}
+
+function getBaseDomainFromUrl(urlStr) {
+    try {
+        const u = new URL(urlStr);
+        return getBaseDomain(u.hostname);
+    } catch {
+        return "";
+    }
 }
 
 document.getElementById('fileInput').addEventListener('change', async event => {
@@ -222,7 +251,8 @@ document.getElementById('fileInput').addEventListener('change', async event => {
         // Check if the participant conducted the test of their changed default.
         if (studyPhase == "initial" && ((treatmentCondition >= 8 && treatmentCondition <= 11))) {
             const filteredHistoryForCheckingTest = historyArray.filter((historyItem) =>
-                ((Date.now() - historyItem.visitTime) / (1000 * 60) <= 15)
+                ((Date.now() - historyItem.visitTime) / (1000 * 60) <= 10) &&
+                (searchEnginesMetadata[changedDefaultKey].getIsSerpPage(historyItem.url))
             );
 
             if (filteredHistoryForCheckingTest.length < 1) {
@@ -240,7 +270,7 @@ document.getElementById('fileInput').addEventListener('change', async event => {
 
         if (studyPhase != "initial") {
             const daysSinceMostRecentHistoryEntry = (Date.now() - historyArray[0].visitTime) / millisecondsPerDay;
-            if (daysSinceMostRecentHistoryEntry > 10) {
+            if (daysSinceMostRecentHistoryEntry > 2) {
                 historyDataEntered = false;
                 document.getElementById('submitButton').disabled = true;
 
@@ -262,7 +292,9 @@ document.getElementById('fileInput').addEventListener('change', async event => {
             (Date.now() - historyItem.visitTime) / millisecondsPerDay <= 30
         );
 
-        for (let historyItem of filteredHistoryForPeriod) {
+        for (let i = 0; i < filteredHistoryForPeriod.length; i++) {
+            const historyItem = filteredHistoryForPeriod[i];
+
             const [searchEngine, _] =
                 Object.entries(searchEnginesMetadata).find(([_, engine]) =>
                     engine.getIsSerpPage(historyItem.url)
@@ -307,6 +339,19 @@ document.getElementById('fileInput').addEventListener('change', async event => {
                 }
             })();
 
+            const engineDomain = getBaseDomainFromUrl(historyItem.url);
+
+            let nextWebpageVisitTime = null;
+            // history is newest -> oldest, so walk backward in the array
+            for (let j = i - 1; j >= 0; j--) {
+                const nextItem = filteredHistoryForPeriod[j];
+                const nextDomain = getBaseDomainFromUrl(nextItem.url);
+                if (nextDomain && nextDomain !== engineDomain) {
+                    nextWebpageVisitTime = nextItem.visitTime;
+                    break;
+                }
+            }
+
             searchUseData.push(
                 {
                     searchEngine: searchEngine,
@@ -316,6 +361,7 @@ document.getElementById('fileInput').addEventListener('change', async event => {
                     previousSearchCount: historyItem.visit_count,
                     queryParameters,
                     serpOriginPageVisits: [],
+                    nextWebpageVisitTime,
                 }
             );
 
