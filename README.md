@@ -4,4 +4,5 @@ This repository contains the code used to direct the participant flow in the Sea
 
 `redirect/` handles the redirect in between initial consent form and the main study survey. This is where the localStorage variables of treatment condition and participant ID are set.
 `mobile/` handles the initial mobile Safari data export
-`extension/` contains the landing page to describe installation of the study extension
+`extension-install/` contains the landing page to describe installation of the study extension
+`extension-verify/` handles the treatment condition assignment and participant ID checking
