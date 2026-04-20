@@ -11,6 +11,7 @@
                     treatmentCondition && !isNaN(parseInt(treatmentCondition, 10));
 
     if (isValid) {
-        window.location.href = `https://placeholder-feedback-form.example.com?PROLIFIC_PID=${prolificId}&TC=${treatmentCondition}`;
+        console.log("works!")
+        // window.location.href = `https://placeholder-feedback-form.example.com?PROLIFIC_PID=${prolificId}&TC=${treatmentCondition}`;
     }
 })();
