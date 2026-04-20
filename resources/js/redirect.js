@@ -83,8 +83,8 @@ const prolificId = (new URLSearchParams(window.location.search)).get("PROLIFIC_P
                 !(treatmentCondition <= 6 && previousTreatmentCondition >= 7)) {
                 window.location.href = "https://app.prolific.com/submissions/complete?cc=CZQ6R4A5";
             } else {
-                localStorage.setItem("searchEngineUseStudyTreatmentCondition", treatmentCondition);
-                localStorage.setItem("searchEngineUseStudyProlificId", prolificId);
+                localStorage.setItem("searchEngineEngagementStudyTreatmentCondition", treatmentCondition);
+                localStorage.setItem("searchEngineEngagementStudyProlificId", prolificId);
 
                 if ((treatmentCondition <= 6 && !getBrowserIsChromeOrEdgeDesktop()) || (treatmentCondition >= 7 && !getBrowserIsSafariMobileVersion(treatmentCondition))) {
                     const url = "https://n97rmes9xl.execute-api.us-east-2.amazonaws.com/deployed";
