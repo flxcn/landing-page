@@ -1,7 +1,9 @@
 (() => {
+    // testing purposes only
     localStorage.setItem("searchEngineEngagementStudyProlificId", "TEST_PROLIFIC_ID");
     localStorage.setItem("searchEngineEngagementStudyTreatmentCondition", "1");
 
+    // pull params from storage
     const prolificId = localStorage.getItem("searchEngineEngagementStudyProlificId");
     const treatmentCondition = localStorage.getItem("searchEngineEngagementStudyTreatmentCondition");
 
