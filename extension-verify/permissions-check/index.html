@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Princeton University - Search Engine Engagement Study</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+    <link rel="stylesheet" href="../../resources/css/style.css">
+
+    <link rel="icon" href="../../resources/images/favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+    <section class="page-content">
+        <div class="hero-body" style="padding-top: 2rem;">
+            <div class="columns is-mobile">
+                <div class="column is-2-tablet is-5-mobile is-offset-2-tablet" style="padding: 0;">
+                    <figure class="image">
+                        <img src="../../resources/images/princeton-logo.png">
+                    </figure>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <h1 class="title is-4">One last check before you continue.</h1>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <p>
+                        Before we hand you off to the feedback page, please confirm that the
+                        <b>Princeton Search Engine Engagement Study</b> extension is set to
+                        <b>Always Allow on All Websites</b> in Safari. This is required for the
+                        study to work correctly.
+                    </p>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-7">
+                    <ol type="1">
+                        <li>
+                            Open the <b>Settings</b> app, scroll down, and tap <b>Safari</b>.
+                        </li>
+                        <br>
+                        <li>
+                            Under <b>General</b>, tap <b>Extensions</b>, then tap
+                            <b>Princeton Search Engine Engagement Study</b>.
+                        </li>
+                        <br>
+                        <li>
+                            Make sure the extension is toggled on, and that
+                            <b>All Websites</b> is set to <b>Allow</b> (not "Ask" or "Deny").
+                            Permissions for <a href="http://google.com" target="_blank">google.com</a>
+                            and <a href="http://search-engine-engagement.cs.princeton.edu" target="_blank">search-engine-engagement.cs.princeton.edu</a>
+                            should also be set to <b>Allow</b>.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-7 has-text-centered">
+                    <img src="../../extension-install/images/image4.png"
+                        style="border: 2.67px solid #000000; max-width: 257px; height: auto;">
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <p>
+                        Once you have verified this, click <b>Continue</b> below to proceed to the
+                        feedback page.
+                    </p>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8 has-text-centered">
+                    <button id="continueButton" class="button is-link">Continue &raquo;</button>
+                </div>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <p>
+                        If you have any questions about the study, please contact the research team at
+                        <a href="mailto:search-engine-engagement-study@lists.cs.princeton.edu">search-engine-engagement-study@lists.cs.princeton.edu</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const prolificId = params.get('PROLIFIC_PID') || '';
+            const treatmentCondition = params.get('TC') || '';
+            const feedbackUrl = 'https://feedback.org?PROLIFIC_PID=' +
+                encodeURIComponent(prolificId) + '&TC=' + encodeURIComponent(treatmentCondition);
+
+            document.getElementById('continueButton').addEventListener('click', function () {
+                window.location.href = feedbackUrl;
+            });
+        })();
+    </script>
+</body>
+
+</html>
