@@ -1,5 +1,8 @@
 (() => {
-    const FEEDBACK_URL = 'TODO_FEEDBACK_URL'; // TODO: replace with the real feedback page URL.
+    // This script only owns the manual-entry form. The extension's onboard.ts content
+    // script owns the auto-detect path (read localStorage → save assignment → run gate →
+    // redirect to feedback.org). On form submit we write localStorage and reload so
+    // onboard.ts picks up the values on the next page load.
     const API_BASE = 'https://oge9hzemfc.execute-api.us-east-2.amazonaws.com/default/';
     const PROLIFIC_ID_KEY = 'searchEngineEngagementStudyProlificId';
     const TREATMENT_CONDITION_KEY = 'searchEngineEngagementStudyTreatmentCondition';
@@ -7,14 +10,6 @@
     function isValid(prolificId, treatmentCondition) {
         return prolificId && prolificId.trim() !== '' &&
                treatmentCondition && !isNaN(parseInt(treatmentCondition, 10));
-    }
-
-    function buildFeedbackUrl(prolificId, treatmentCondition) {
-        return `${FEEDBACK_URL}?PROLIFIC_PID=${encodeURIComponent(prolificId)}&TC=${encodeURIComponent(treatmentCondition)}`;
-    }
-
-    function redirectToFeedback(prolificId, treatmentCondition) {
-        window.location.href = buildFeedbackUrl(prolificId, treatmentCondition);
     }
 
     function renderForm() {
@@ -97,7 +92,9 @@
 
             localStorage.setItem(PROLIFIC_ID_KEY, prolificId);
             localStorage.setItem(TREATMENT_CONDITION_KEY, treatmentCondition);
-            redirectToFeedback(prolificId, treatmentCondition);
+            // Reload so onboard.ts (content script) picks up the values, saves the
+            // assignment, runs the Google-app gate, and redirects to feedback.org.
+            window.location.reload();
         }
 
         button.addEventListener('click', submit);
@@ -119,10 +116,9 @@
         const prolificId = localStorage.getItem(PROLIFIC_ID_KEY);
         const treatmentCondition = localStorage.getItem(TREATMENT_CONDITION_KEY);
 
-        if (isValid(prolificId, treatmentCondition)) {
-            redirectToFeedback(prolificId, treatmentCondition);
-            return;
-        }
+        // If localStorage is already populated, do nothing — the extension's onboard.ts
+        // will read the same values, save the assignment, and drive the rest of the flow.
+        if (isValid(prolificId, treatmentCondition)) return;
 
         renderForm();
     }
